@@ -13,6 +13,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class LearnTrackApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(LearnTrackApplication.class, args);
+        var context = SpringApplication.run(LearnTrackApplication.class, args);
+        String port = context.getEnvironment().getProperty("server.port");
+        System.out.println("🚀 LearnTrack Backend is running on port: " + port);
+        System.out.println("🔗 Health Check URL: http://localhost:" + port + "/api/health");
     }
 }
