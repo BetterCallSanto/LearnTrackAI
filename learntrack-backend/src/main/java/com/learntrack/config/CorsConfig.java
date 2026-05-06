@@ -25,18 +25,8 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allowed origins — frontend URLs (includes all common dev ports)
-        config.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",
-                "http://localhost:3001",
-                "http://localhost:3002",
-                "http://localhost:3005",
-                "http://localhost:5173",
-                "http://127.0.0.1:3000",
-                "http://127.0.0.1:3001",
-                "http://127.0.0.1:3005",
-                "https://learntrack.netlify.app"
-        ));
+        // Allowed origins — Using patterns to allow dynamic Vercel URLs
+        config.setAllowedOriginPatterns(Arrays.asList("*"));
 
         // Allowed HTTP methods
         config.setAllowedMethods(Arrays.asList(
