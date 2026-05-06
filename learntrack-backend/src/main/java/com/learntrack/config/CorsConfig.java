@@ -24,14 +24,8 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allowed origins — Specifying exact and pattern-based origins
-        config.setAllowedOriginPatterns(Arrays.asList(
-                "http://localhost:[*]",
-                "http://127.0.0.1:[*]",
-                "https://learntrack-frontend.netlify.app",
-                "https://*.netlify.app",
-                "https://*.vercel.app"
-        ));
+        // Allowed origins — Simplified wildcard for production stability
+        config.setAllowedOriginPatterns(Arrays.asList("*"));
 
         // Allowed HTTP methods
         config.setAllowedMethods(Arrays.asList(
@@ -47,8 +41,8 @@ public class CorsConfig {
                 "X-Requested-With"
         ));
 
-        // Allow credentials (cookies, authorization headers)
-        config.setAllowCredentials(true);
+        // Allow credentials (disabled to allow wildcard origin)
+        config.setAllowCredentials(false);
 
         // How long the browser caches the CORS preflight response (1 hour)
         config.setMaxAge(3600L);
