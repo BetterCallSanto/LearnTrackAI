@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiBook, FiCheckSquare, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiBook, FiCheckSquare, FiTrash2 } from 'react-icons/fi';
 
 const JourneyCard = ({ journey, onDelete }) => {
   const formattedDate = new Date(journey.createdAt).toLocaleDateString('en-US', {

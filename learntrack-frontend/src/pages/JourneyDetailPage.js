@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import Navbar from '../components/Navbar';
@@ -12,11 +12,7 @@ const JourneyDetailPage = () => {
   const [logs, setLogs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchData();
-  }, [id]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [journeyRes, logsRes] = await Promise.all([
         api.get(`/api/journeys/${id}`),
@@ -29,7 +25,11 @@ const JourneyDetailPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleDeleteLog = async (logId) => {
     if (window.confirm('Are you sure you want to delete this log? All notes and attachments will be permanently deleted.')) {

@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import Navbar from '../components/Navbar';
-import { AuthContext } from '../context/AuthContext';
 import { FiArrowLeft, FiCheckSquare, FiRefreshCcw, FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 
