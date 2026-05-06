@@ -42,6 +42,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // Enable CORS — uses our CorsConfig
+                .cors(org.springframework.security.config.Customizer.withDefaults())
+                
                 // Disable CSRF — not needed for stateless JWT authentication
                 .csrf(csrf -> csrf.disable())
 

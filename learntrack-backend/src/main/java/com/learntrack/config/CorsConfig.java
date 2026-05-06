@@ -3,11 +3,10 @@ package com.learntrack.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * CorsConfig — Cross-Origin Resource Sharing Configuration.
@@ -22,13 +21,14 @@ import java.util.List;
 public class CorsConfig {
 
     @Bean
-    public CorsFilter corsFilter() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allowed origins — Specifying patterns to allow credentials
+        // Allowed origins — Specifying exact and pattern-based origins
         config.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:[*]",
                 "http://127.0.0.1:[*]",
+                "https://learntrack-frontend.netlify.app",
                 "https://*.netlify.app",
                 "https://*.vercel.app"
         ));
@@ -57,6 +57,6 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
 
-        return new CorsFilter(source);
+        return source;
     }
 }
