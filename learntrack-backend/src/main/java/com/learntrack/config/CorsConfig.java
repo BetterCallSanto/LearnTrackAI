@@ -25,8 +25,13 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allowed origins — Using patterns to allow dynamic Vercel URLs
-        config.setAllowedOriginPatterns(Arrays.asList("*"));
+        // Allowed origins — Specifying patterns to allow credentials
+        config.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:[*]",
+                "http://127.0.0.1:[*]",
+                "https://*.netlify.app",
+                "https://*.vercel.app"
+        ));
 
         // Allowed HTTP methods
         config.setAllowedMethods(Arrays.asList(
