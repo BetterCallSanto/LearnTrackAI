@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import Navbar from '../components/Navbar';
@@ -8,17 +8,12 @@ import { toast } from 'react-hot-toast';
 
 const RevisionPage = () => {
   const { id } = useParams();
-  const { user } = useContext(AuthContext);
   const [journey, setJourney] = useState(null);
   const [dayGroups, setDayGroups] = useState([]);
   const [activeDay, setActiveDay] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchData();
-  }, [id]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [journeyRes, revisionRes] = await Promise.all([
         api.get(`/api/journeys/${id}`),
@@ -47,7 +42,11 @@ const RevisionPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const toggleNote = async (dayNumber, noteId) => {
     try {
