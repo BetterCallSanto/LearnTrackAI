@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiPaperclip, FiImage, FiLink, FiYoutube, FiX, FiTrash2, FiExternalLink, FiDownload } from 'react-icons/fi';
+import { FiPaperclip, FiImage, FiLink, FiYoutube, FiX, FiExternalLink, FiDownload } from 'react-icons/fi';
 import api from '../api/axiosConfig';
 import { toast } from 'react-hot-toast';
 
