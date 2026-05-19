@@ -51,7 +51,7 @@ const ShortNoteItem = ({ note, onDelete, onUpdate }) => {
       alignItems: 'flex-start',
       gap: '0.75rem',
       padding: '0.75rem',
-      backgroundColor: '#f8fafc',
+      backgroundColor: 'var(--bg-input)',
       borderRadius: '6px',
       marginBottom: '0.5rem',
       border: '1px solid var(--border)'

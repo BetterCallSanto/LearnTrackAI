@@ -3,7 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import Navbar from '../components/Navbar';
 import LogCard from '../components/LogCard';
-import { FiArrowLeft, FiPlus, FiBookOpen } from 'react-icons/fi';
+import LogListRow from '../components/LogListRow';
+import { FiArrowLeft, FiPlus, FiBookOpen, FiGrid, FiList } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 
 const JourneyDetailPage = () => {
@@ -11,6 +12,16 @@ const JourneyDetailPage = () => {
   const [journey, setJourney] = useState(null);
   const [logs, setLogs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // View mode: 'grid' | 'list' — persisted in localStorage
+  const [viewMode, setViewMode] = useState(() => {
+    return localStorage.getItem('logsViewMode') || 'grid';
+  });
+
+  const handleSetViewMode = (mode) => {
+    setViewMode(mode);
+    localStorage.setItem('logsViewMode', mode);
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -36,8 +47,6 @@ const JourneyDetailPage = () => {
       try {
         await api.delete(`/api/logs/${logId}`);
         toast.success('Log deleted successfully');
-        // Re-fetch both journey (updated daysLogged count) and logs
-        // (because the backend renumbers all subsequent days)
         fetchData();
       } catch (error) {
         toast.error('Failed to delete log');
@@ -78,19 +87,92 @@ const JourneyDetailPage = () => {
 
           <hr style={{ border: 0, borderTop: '1px solid var(--border)', marginBottom: '2rem' }} />
 
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Daily Logs</h2>
+          {/* ── Section Header with view toggle ── */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Daily Logs</h2>
+
+            {logs.length > 0 && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                backgroundColor: 'var(--bg-subtle)',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                padding: '3px',
+              }}>
+                {/* Grid button */}
+                <button
+                  onClick={() => handleSetViewMode('grid')}
+                  title="Grid view"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    backgroundColor: viewMode === 'grid' ? 'var(--primary)' : 'transparent',
+                    color: viewMode === 'grid' ? 'white' : 'var(--text-secondary)',
+                    transition: 'all 0.18s ease',
+                  }}
+                >
+                  <FiGrid size={15} />
+                </button>
+
+                {/* List button */}
+                <button
+                  onClick={() => handleSetViewMode('list')}
+                  title="List view"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    backgroundColor: viewMode === 'list' ? 'var(--primary)' : 'transparent',
+                    color: viewMode === 'list' ? 'white' : 'var(--text-secondary)',
+                    transition: 'all 0.18s ease',
+                  }}
+                >
+                  <FiList size={15} />
+                </button>
+              </div>
+            )}
+          </div>
 
           {logs.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-              {logs.map(log => (
-                <LogCard 
-                  key={log.id} 
-                  log={log} 
-                  journeyId={id}
-                  onDelete={handleDeleteLog}
-                />
-              ))}
-            </div>
+            viewMode === 'grid' ? (
+              /* ── Grid View ── */
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                {logs.map(log => (
+                  <LogCard
+                    key={log.id}
+                    log={log}
+                    journeyId={id}
+                    onDelete={handleDeleteLog}
+                  />
+                ))}
+              </div>
+            ) : (
+              /* ── List View ── */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {logs.map((log, index) => (
+                  <LogListRow
+                    key={log.id}
+                    log={log}
+                    journeyId={id}
+                    onDelete={handleDeleteLog}
+                    index={index}
+                  />
+                ))}
+              </div>
+            )
           ) : (
             <div className="card" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
               <h3 style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>No days logged yet.</h3>

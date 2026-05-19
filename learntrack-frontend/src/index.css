@@ -6,15 +6,78 @@
   --primary-hover: #1E40AF;
   --bg-page: #F8FAFC;
   --bg-card: #FFFFFF;
+  --bg-input: #F8FAFC;
+  --bg-subtle: #F1F5F9;
+  --bg-hover-row: #F1F5F9;
   --text-primary: #1E293B;
   --text-secondary: #64748B;
   --border: #E2E8F0;
   --success: #16A34A;
   --error: #DC2626;
   --revised: #94A3B8;
+  --theme-toggle-bg: transparent;
+
+  /* Success Banner */
+  --success-banner-bg: #DCFCE7;
+  --success-banner-color: #166534;
+  --success-banner-border: #BBF7D0;
+
+  /* Error Banner */
+  --error-banner-bg: #FEE2E2;
+
+  /* Skeleton / Pulse */
+  --skeleton-bg: #E2E8F0;
+
+  /* Day header expanded */
+  --day-header-expanded-bg: #F8FAFC;
+  --day-header-base-bg: var(--bg-card);
 
   /* Typography */
   --font-main: 'Inter', system-ui, sans-serif;
+}
+
+/* ─── Dark Mode ────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --primary: #4D8EFF;
+  --primary-hover: #6BA3FF;
+  --bg-page: #0F1117;
+  --bg-card: #1A1D27;
+  --bg-input: #22263A;
+  --bg-subtle: #22263A;
+  --bg-hover-row: #252A3D;
+  --text-primary: #E8EAED;
+  --text-secondary: #8A92A3;
+  --border: #2E3347;
+  --success: #34D399;
+  --error: #F87171;
+  --revised: #4B5563;
+  --theme-toggle-bg: rgba(255,255,255,0.05);
+
+  /* Success Banner */
+  --success-banner-bg: #0D2E1C;
+  --success-banner-color: #6EE7B7;
+  --success-banner-border: #166534;
+
+  /* Error Banner */
+  --error-banner-bg: #2D1010;
+
+  /* Skeleton / Pulse */
+  --skeleton-bg: #2E3347;
+
+  /* Day header */
+  --day-header-expanded-bg: #1E2234;
+  --day-header-base-bg: var(--bg-card);
+}
+
+/* ─── Smooth transition for theme switch ───────────────────── */
+*, *::before, *::after {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+/* Exclude elements where transition would look bad */
+input, textarea, select, button .spinner {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease,
+              box-shadow 0.2s ease;
 }
 
 * {
@@ -127,12 +190,14 @@ button {
   border-radius: 6px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   font-family: var(--font-main);
+  background-color: var(--bg-card);
+  color: var(--text-primary);
 }
 
 .form-control:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+  box-shadow: 0 0 0 3px rgba(77, 142, 255, 0.15);
 }
 
 /* Card Styles */

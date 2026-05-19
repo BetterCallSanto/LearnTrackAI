@@ -40,6 +40,7 @@ D:\java_lms\learntrack-backend\src\main\java\com\learntrack\dao\LogDAO.java
 D:\java_lms\learntrack-backend\src\main\java\com\learntrack\dto\ErrorResponse.java
 D:\java_lms\learntrack-backend\src\main\java\com\learntrack\dto\LogRequest.java
 D:\java_lms\learntrack-backend\src\main\java\com\learntrack\exception\BadRequestException.java
+D:\java_lms\learntrack-backend\src\main\java\com\learntrack\controller\HealthCheckController.java
 D:\java_lms\learntrack-backend\src\main\java\com\learntrack\dao\AttachmentDAO.java
 D:\java_lms\learntrack-backend\src\main\java\com\learntrack\dao\JourneyDAO.java
 D:\java_lms\learntrack-backend\src\main\java\com\learntrack\config\JwtAuthFilter.java

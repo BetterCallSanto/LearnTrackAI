@@ -52,6 +52,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints — no authentication required
                         .requestMatchers("/api/auth/**").permitAll()
+                        // Health check endpoint — public for monitoring
+                        .requestMatchers("/api/health/**").permitAll()
                         // File serving endpoint — public for displaying uploaded files
                         .requestMatchers("/api/files/**").permitAll()
                         // All other endpoints require authentication

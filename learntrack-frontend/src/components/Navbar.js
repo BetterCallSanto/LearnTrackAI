@@ -1,10 +1,12 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FiLogOut, FiBookOpen } from 'react-icons/fi';
+import { useTheme } from '../context/ThemeContext';
+import { FiLogOut, FiBookOpen, FiSun, FiMoon } from 'react-icons/fi';
 
 const Navbar = ({ leftContent, rightContent }) => {
   const { user, logout } = useContext(AuthContext);
+  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -42,11 +44,59 @@ const Navbar = ({ leftContent, rightContent }) => {
         </div>
 
         <div>
-          {rightContent ? rightContent : (
+          {rightContent ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              {rightContent}
+              <button
+                onClick={toggleTheme}
+                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'var(--theme-toggle-bg)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '50%',
+                  width: '34px',
+                  height: '34px',
+                  color: 'var(--text-secondary)',
+                  transition: 'all 0.2s ease',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+                onMouseOver={(e) => e.currentTarget.style.color = 'var(--primary)'}
+                onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+              >
+                {isDark ? <FiSun size={16} /> : <FiMoon size={16} />}
+              </button>
+            </div>
+          ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
             <span className="hide-mobile" style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
               Hello, <strong style={{ color: 'var(--text-primary)' }}>{user.fullName || user.username}</strong>
             </span>
+            <button
+              onClick={toggleTheme}
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--theme-toggle-bg)',
+                border: '1px solid var(--border)',
+                borderRadius: '50%',
+                width: '34px',
+                height: '34px',
+                color: 'var(--text-secondary)',
+                transition: 'all 0.2s ease',
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+              onMouseOver={(e) => e.currentTarget.style.color = 'var(--primary)'}
+              onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+            >
+              {isDark ? <FiSun size={16} /> : <FiMoon size={16} />}
+            </button>
             <button 
               onClick={handleLogout}
               style={{

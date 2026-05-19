@@ -141,6 +141,7 @@ public class JourneyController {
 
             if (!notes.isEmpty()) {
                 Map<String, Object> dayGroup = new LinkedHashMap<>();
+                dayGroup.put("logId", log.getId());
                 dayGroup.put("dayNumber", log.getDayNumber());
                 dayGroup.put("title", log.getTitle());
                 dayGroup.put("logDate", log.getLogDate().toString());

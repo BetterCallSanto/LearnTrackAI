@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import LoginPage from './pages/LoginPage';
@@ -14,8 +15,9 @@ import RevisionPage from './pages/RevisionPage';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
         <Toaster position="bottom-right" toastOptions={{ duration: 3000 }} />
         <Routes>
           {/* Public Routes */}
@@ -62,9 +64,10 @@ function App() {
           
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/home" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

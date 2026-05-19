@@ -147,7 +147,7 @@ const AttachmentUploader = ({ logId, attachments, onAttachmentsChange }) => {
       </h3>
 
       {/* Upload Controls */}
-      <div className="card" style={{ padding: '1rem', marginBottom: '1.5rem', backgroundColor: '#f8fafc' }}>
+      <div className="card" style={{ padding: '1rem', marginBottom: '1.5rem', backgroundColor: 'var(--bg-input)' }}>
         <div className="tabs-container" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
           <button 
             type="button"
@@ -211,7 +211,7 @@ const AttachmentUploader = ({ logId, attachments, onAttachmentsChange }) => {
       {attachments.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
           {attachments.map(att => (
-            <div key={att.id} style={{ border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden', backgroundColor: 'white', position: 'relative' }}>
+            <div key={att.id} style={{ border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden', backgroundColor: 'var(--bg-card)', position: 'relative' }}>
               <button 
                 type="button"
                 onClick={() => handleDelete(att.id)}
@@ -221,7 +221,7 @@ const AttachmentUploader = ({ logId, attachments, onAttachmentsChange }) => {
               </button>
 
               {att.attachmentType === 'IMAGE' && (
-                <div style={{ height: '120px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9' }}>
+                <div style={{ height: '120px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-subtle)' }}>
                   <img src={`${API_BASE}${att.fileUrl}`} alt={att.fileName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
               )}

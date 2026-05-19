@@ -162,7 +162,7 @@ const CreateLogPage = () => {
             <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
               {isEditMode ? (
                 <span style={{ 
-                  backgroundColor: 'rgba(26, 86, 219, 0.1)', 
+                  backgroundColor: 'rgba(77, 142, 255, 0.12)', 
                   color: 'var(--primary)',
                   padding: '0.25rem 0.75rem',
                   borderRadius: '999px',
@@ -173,7 +173,7 @@ const CreateLogPage = () => {
                 </span>
               ) : (
                 <span style={{ 
-                  backgroundColor: '#f1f5f9', 
+                  backgroundColor: 'var(--bg-subtle)', 
                   color: 'var(--text-secondary)',
                   padding: '0.25rem 0.75rem',
                   borderRadius: '999px',
@@ -230,7 +230,7 @@ const CreateLogPage = () => {
                   onChange={(e) => setNewNote(e.target.value)}
                   onKeyDown={handleAddNote}
                   placeholder="Type a short note and press Enter..."
-                  style={{ backgroundColor: '#f8fafc' }}
+                  style={{ backgroundColor: 'var(--bg-input)' }}
                 />
               </div>
 

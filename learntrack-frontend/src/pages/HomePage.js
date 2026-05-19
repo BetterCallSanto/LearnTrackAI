@@ -39,6 +39,20 @@ const HomePage = () => {
     }
   };
 
+  const handleUpdate = async (id, newName) => {
+    try {
+      const targetJourney = journeys.find(j => j.id === id);
+      const response = await api.put(`/api/journeys/${id}`, { 
+        name: newName, 
+        description: targetJourney.description || '' 
+      });
+      setJourneys(journeys.map(j => j.id === id ? { ...j, name: response.data.name } : j));
+      toast.success('Journey renamed');
+    } catch (error) {
+      toast.error('Failed to rename journey');
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -60,10 +74,10 @@ const HomePage = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
               {[1, 2, 3].map(i => (
                 <div key={i} className="card" style={{ height: '220px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div style={{ height: '24px', background: '#e2e8f0', borderRadius: '4px', width: '70%', animation: 'pulse 1.5s infinite' }}></div>
-                  <div style={{ height: '16px', background: '#e2e8f0', borderRadius: '4px', width: '100%', animation: 'pulse 1.5s infinite' }}></div>
-                  <div style={{ height: '16px', background: '#e2e8f0', borderRadius: '4px', width: '80%', animation: 'pulse 1.5s infinite' }}></div>
-                  <div style={{ marginTop: 'auto', height: '38px', background: '#e2e8f0', borderRadius: '6px', width: '100%', animation: 'pulse 1.5s infinite' }}></div>
+                  <div style={{ height: '24px', background: 'var(--skeleton-bg)', borderRadius: '4px', width: '70%', animation: 'pulse 1.5s infinite' }}></div>
+                  <div style={{ height: '16px', background: 'var(--skeleton-bg)', borderRadius: '4px', width: '100%', animation: 'pulse 1.5s infinite' }}></div>
+                  <div style={{ height: '16px', background: 'var(--skeleton-bg)', borderRadius: '4px', width: '80%', animation: 'pulse 1.5s infinite' }}></div>
+                  <div style={{ marginTop: 'auto', height: '38px', background: 'var(--skeleton-bg)', borderRadius: '6px', width: '100%', animation: 'pulse 1.5s infinite' }}></div>
                 </div>
               ))}
               <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }`}</style>
@@ -75,6 +89,7 @@ const HomePage = () => {
                   key={journey.id} 
                   journey={journey} 
                   onDelete={handleDelete}
+                  onUpdate={handleUpdate}
                 />
               ))}
             </div>

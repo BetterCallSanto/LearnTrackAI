@@ -16,7 +16,7 @@ const LogCard = ({ log, journeyId, onDelete }) => {
         <div>
           <span style={{ 
             display: 'inline-block',
-            backgroundColor: 'rgba(26, 86, 219, 0.1)', 
+            backgroundColor: 'rgba(77, 142, 255, 0.12)', 
             color: 'var(--primary)',
             padding: '0.25rem 0.75rem',
             borderRadius: '999px',
@@ -80,7 +80,7 @@ const LogCard = ({ log, journeyId, onDelete }) => {
         color: 'var(--text-secondary)', 
         marginBottom: '1.5rem',
         padding: '0.75rem',
-        backgroundColor: '#f1f5f9',
+        backgroundColor: 'var(--bg-subtle)',
         borderRadius: '6px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

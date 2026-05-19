@@ -55,7 +55,7 @@ const LoginPage = () => {
         <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Log in to your LearnTrack account</p>
 
         {errorMsg && (
-          <div style={{ backgroundColor: '#FEE2E2', color: 'var(--error)', padding: '0.75rem', borderRadius: '6px', marginBottom: '1rem', fontSize: '14px', textAlign: 'center' }}>
+          <div style={{ backgroundColor: 'var(--error-banner-bg)', color: 'var(--error)', padding: '0.75rem', borderRadius: '6px', marginBottom: '1rem', fontSize: '14px', textAlign: 'center' }}>
             {errorMsg}
           </div>
         )}
