@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiBook, FiCheckSquare, FiTrash2, FiEdit2, FiCheck, FiX } from 'react-icons/fi';
+import { FiBook, FiCheckSquare, FiTrash2, FiEdit2, FiCheck } from 'react-icons/fi';
 
 const JourneyCard = ({ journey, onDelete, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);

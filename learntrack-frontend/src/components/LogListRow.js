@@ -10,15 +10,7 @@ import api from '../api/axiosConfig';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
-/* ── helper: YouTube embed ── */
-const getEmbedUrl = (url) => {
-  try {
-    const u = new URL(url);
-    if (u.hostname.includes('youtube.com')) return `https://www.youtube.com/embed/${u.searchParams.get('v')}`;
-    if (u.hostname.includes('youtu.be')) return `https://www.youtube.com/embed/${u.pathname.slice(1)}`;
-  } catch (_) {}
-  return null;
-};
+/* ── helper: YouTube embed (removed unused) ── */
 
 /* ── attachment icon helper ── */
 const AttIcon = ({ type }) => {

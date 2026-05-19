@@ -3,3 +3,4 @@ database_dump.sql
 uploads/
 learntrack-backend/uploads/
 .env
+database_dump_utf8.sql
