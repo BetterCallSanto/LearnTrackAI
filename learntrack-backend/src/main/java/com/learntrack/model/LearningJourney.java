@@ -69,4 +69,6 @@ public class LearningJourney {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+
 }
