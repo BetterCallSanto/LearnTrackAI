@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import Navbar from '../components/Navbar';
 import ImageLightbox from '../components/ImageLightbox';
+import InterviewAvatar from '../components/InterviewAvatar';
+import CodeSnippet from '../components/CodeSnippet';
 import { FiArrowLeft, FiCheckSquare, FiRefreshCcw, FiChevronDown, FiChevronRight, FiPaperclip, FiImage, FiFileText } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 
@@ -18,6 +20,10 @@ const RevisionPage = () => {
   /* attachments cache: { [logId]: [{type, url, name}] } */
   const [attachCache, setAttachCache] = useState({});
   const [loadingAttach, setLoadingAttach] = useState({});
+
+  /* snippets cache: { [logId]: [CodeSnippet] } */
+  const [snippetCache, setSnippetCache] = useState({});
+  const [loadingSnippets, setLoadingSnippets] = useState({});
 
   /* dropdown open state — which logId's dropdown is open */
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -79,13 +85,37 @@ const RevisionPage = () => {
     }
   }, [attachCache, loadingAttach]);
 
+  /* ── Fetch snippets for a log ── */
+  const fetchSnippets = useCallback(async (logId) => {
+    if (!logId || snippetCache[logId] || loadingSnippets[logId]) return;
+    setLoadingSnippets(prev => ({ ...prev, [logId]: true }));
+    try {
+      const res = await api.get(`/api/logs/${logId}`);
+      setSnippetCache(prev => ({ ...prev, [logId]: res.data.codeSnippets || [] }));
+    } catch (_) {
+      setSnippetCache(prev => ({ ...prev, [logId]: [] }));
+    } finally {
+      setLoadingSnippets(prev => ({ ...prev, [logId]: false }));
+    }
+  }, [snippetCache, loadingSnippets]);
+
+  // Auto-fetch attachments and snippets for the active day
+  useEffect(() => {
+    if (activeDay !== null && dayGroups.length > 0) {
+      const activeGroup = dayGroups.find(g => g.dayNumber === activeDay);
+      if (activeGroup && activeGroup.logId) {
+        fetchAttachments(activeGroup.logId);
+        fetchSnippets(activeGroup.logId);
+      }
+    }
+  }, [activeDay, dayGroups, fetchAttachments, fetchSnippets]);
+
   /* ── Day toggle ── */
-  const handleDayToggle = useCallback((dayNumber, logId) => {
+  const handleDayToggle = useCallback((dayNumber) => {
     const expanding = activeDay !== dayNumber;
     setActiveDay(expanding ? dayNumber : null);
     setOpenDropdown(null);
-    if (expanding && logId) fetchAttachments(logId);
-  }, [activeDay, fetchAttachments]);
+  }, [activeDay]);
 
   /* ── Note toggle ── */
   const toggleNote = async (dayNumber, noteId) => {
@@ -108,7 +138,6 @@ const RevisionPage = () => {
             const nextGroup = newDayGroups[currentIndex + 1];
             setTimeout(() => {
               setActiveDay(nextGroup.dayNumber);
-              if (nextGroup.logId) fetchAttachments(nextGroup.logId);
               toast.success(`Day ${dayNumber} complete! Moving to Day ${nextGroup.dayNumber}`);
             }, 600);
           } else {
@@ -236,6 +265,7 @@ const RevisionPage = () => {
                 const isDayComplete = group.notes.every(n => n.isRevised);
                 const dateStr = new Date(group.logDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                 const attachments = attachCache[group.logId] || [];
+                const snippets = snippetCache[group.logId] || [];
                 const isDropdownOpen = openDropdown === group.logId;
                 const imageAttachments = attachments.filter(a => a.type === 'IMAGE').map(a => ({ url: a.url, name: a.name }));
 
@@ -306,8 +336,8 @@ const RevisionPage = () => {
                           </div>
                         )}
 
-                        {/* Loading indicator for attachments */}
-                        {isExpanded && loadingAttach[group.logId] && (
+                        {/* Loading indicator for attachments or snippets */}
+                        {isExpanded && (loadingAttach[group.logId] || loadingSnippets[group.logId]) && (
                           <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px', borderColor: 'var(--primary)', borderTopColor: 'transparent' }}></div>
                         )}
 
@@ -326,6 +356,26 @@ const RevisionPage = () => {
 
                     {isExpanded && (
                       <div style={{ padding: '1.25rem' }}>
+                        {snippets.length > 0 && (
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            {snippets.map(snippet => (
+                              <CodeSnippet
+                                key={snippet.id}
+                                snippet={snippet}
+                                logId={group.logId}
+                                isRevisionMode={true}
+                                onUpdate={(updated) => {
+                                  if (snippetCache[group.logId]) {
+                                    const updatedSnippets = snippetCache[group.logId].map(s => s.id === updated.id ? updated : s);
+                                    setSnippetCache(prev => ({ ...prev, [group.logId]: updatedSnippets }));
+                                  }
+                                }}
+                                onDelete={() => {}}
+                              />
+                            ))}
+                          </div>
+                        )}
+                        
                         {group.notes.map(note => (
                           <label
                             key={note.id}
@@ -375,6 +425,9 @@ const RevisionPage = () => {
           )}
         </div>
       </div>
+
+      {/* ── Floating Interview Avatar ── */}
+      <InterviewAvatar journeyId={id} />
 
       {/* ── Lightbox Modal ── */}
       {lightbox.open && (

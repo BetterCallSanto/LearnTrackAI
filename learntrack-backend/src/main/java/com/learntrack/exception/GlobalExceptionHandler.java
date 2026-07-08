@@ -102,6 +102,20 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle Spring Boot 3 NoResourceFoundException (404) for missing static files.
+     */
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .error("Not Found")
+                .message("The requested file or resource could not be found.")
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    /**
      * Handle all other unexpected exceptions (500).
      */
     @ExceptionHandler(Exception.class)

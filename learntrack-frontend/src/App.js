@@ -12,6 +12,7 @@ import CreateJourneyPage from './pages/CreateJourneyPage';
 import JourneyDetailPage from './pages/JourneyDetailPage';
 import CreateLogPage from './pages/CreateLogPage';
 import RevisionPage from './pages/RevisionPage';
+import InterviewPage from './pages/InterviewPage';
 
 function App() {
   return (
@@ -59,6 +60,12 @@ function App() {
           <Route path="/journey/:id/revision" element={
             <ProtectedRoute>
               <RevisionPage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/journey/:id/interview" element={
+            <ProtectedRoute>
+              <InterviewPage />
             </ProtectedRoute>
           } />
           

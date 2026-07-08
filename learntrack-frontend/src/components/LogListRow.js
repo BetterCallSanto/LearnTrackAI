@@ -4,9 +4,10 @@ import {
   FiChevronDown, FiChevronUp, FiEdit2, FiTrash2,
   FiFileText, FiPaperclip, FiCalendar, FiLink,
   FiYoutube, FiImage, FiDownload, FiExternalLink,
-  FiList, FiChevronRight,
+  FiList, FiChevronRight, FiCode
 } from 'react-icons/fi';
 import api from '../api/axiosConfig';
+import CodeSnippet from './CodeSnippet';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
@@ -24,6 +25,7 @@ const AttIcon = ({ type }) => {
 const LogListRow = ({ log, journeyId, onDelete }) => {
   const [isExpanded,   setIsExpanded]   = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
+  const [showCode,     setShowCode]     = useState(false);
   const [details,      setDetails]      = useState(null);   // fetched once on expand
   const [isFetching,   setIsFetching]   = useState(false);
 
@@ -52,6 +54,7 @@ const LogListRow = ({ log, journeyId, onDelete }) => {
   const notes       = details?.shortNotes   || [];
   const attachments = details?.attachments  || [];
   const description = details?.description  || log.description || '';
+  const snippets    = details?.codeSnippets || [];
 
   /* ── description clamp (3 lines ≈ 4.5em) ── */
   const DESC_CLAMP = 3;
@@ -114,6 +117,10 @@ const LogListRow = ({ log, journeyId, onDelete }) => {
                 bg="var(--bg-subtle)" color="var(--text-secondary)" />
           <Chip icon={<FiFileText size={11} />} label={`${log.shortNoteCount} Notes`}
                 bg="rgba(77,142,255,0.12)" color="var(--primary)" />
+          {log.codeSnippetCount > 0 && (
+            <Chip icon={<FiCode size={11} />} label={`${log.codeSnippetCount} Snippets`}
+                  bg="rgba(139,92,246,0.12)" color="#8B5CF6" />
+          )}
           {log.attachmentCount > 0 && (
             <Chip icon={<FiPaperclip size={11} />} label={`${log.attachmentCount} Files`}
                   bg="rgba(22,163,74,0.12)" color="var(--success)" />
@@ -204,6 +211,42 @@ const LogListRow = ({ log, journeyId, onDelete }) => {
           )}
           {!isFetching && !isFetching && notes.length === 0 && log.shortNoteCount > 0 && (
             /* Edge case: API returned but notes empty */ null
+          )}
+
+          {/* ── Code Snippets ── */}
+          {!isFetching && snippets.length > 0 && (
+            <div style={{ marginTop: '0.25rem' }}>
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowCode(v => !v); }}
+                style={{
+                  background: 'none', border: 'none', padding: '0.3rem 0',
+                  color: 'var(--primary)', fontSize: '13px', fontWeight: '500',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem',
+                }}
+              >
+                <FiCode size={14} /> {showCode ? 'Hide Code ↑' : 'Show Code ↓'}
+              </button>
+              
+          {showCode && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
+                  {snippets.map(snippet => (
+                    <CodeSnippet
+                      key={snippet.id}
+                      snippet={snippet}
+                      logId={log.id}
+                      isRevisionMode={true}
+                      onUpdate={(updated) => {
+                        if (details && details.codeSnippets) {
+                          const updatedSnippets = details.codeSnippets.map(s => s.id === updated.id ? updated : s);
+                          setDetails({ ...details, codeSnippets: updatedSnippets });
+                        }
+                      }}
+                      onDelete={() => {}}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           )}
 
           {/* ── Attachments ── */}

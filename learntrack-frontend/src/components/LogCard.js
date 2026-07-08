@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiEdit2, FiTrash2, FiFileText, FiPaperclip } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiFileText, FiPaperclip, FiCode } from 'react-icons/fi';
 
 const LogCard = ({ log, journeyId, onDelete }) => {
   const formattedDate = new Date(log.logDate).toLocaleDateString('en-US', {
@@ -89,6 +89,11 @@ const LogCard = ({ log, journeyId, onDelete }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <FiPaperclip /> {log.attachmentCount} Attachments
         </div>
+        {log.codeSnippetCount > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <FiCode /> {log.codeSnippetCount} Snippets
+          </div>
+        )}
       </div>
 
       <Link 

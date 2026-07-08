@@ -34,6 +34,23 @@
 
   /* Typography */
   --font-main: 'Inter', system-ui, sans-serif;
+
+  /* Interview / Chat */
+  --interview-bubble-pam: #F1F5F9;
+  --interview-bubble-user: var(--primary);
+  --interview-bubble-user-text: #FFFFFF;
+  --interview-bubble-pam-text: var(--text-primary);
+  --interview-input-bg: #FFFFFF;
+  --interview-header-bg: var(--bg-card);
+  --interview-avatar-border: #EC4899;
+  --interview-avatar-glow: rgba(236, 72, 153, 0.25);
+
+  /* Compiler */
+  --compiler-bg: #1E1E1E; /* Keep dark theme for editor in light mode too */
+  --compiler-text: #D4D4D4;
+  --compiler-border: #E2E8F0;
+  --compiler-toolbar-bg: #F8FAFC;
+  --compiler-toolbar-border: #E2E8F0;
 }
 
 /* ─── Dark Mode ────────────────────────────────────────────── */
@@ -67,6 +84,23 @@
   /* Day header */
   --day-header-expanded-bg: #1E2234;
   --day-header-base-bg: var(--bg-card);
+
+  /* Interview / Chat */
+  --interview-bubble-pam: #22263A;
+  --interview-bubble-user: #4D8EFF;
+  --interview-bubble-user-text: #FFFFFF;
+  --interview-bubble-pam-text: #E8EAED;
+  --interview-input-bg: #1A1D27;
+  --interview-header-bg: #1A1D27;
+  --interview-avatar-border: #F472B6;
+  --interview-avatar-glow: rgba(244, 114, 182, 0.3);
+
+  /* Compiler */
+  --compiler-bg: #1E1E1E;
+  --compiler-text: #D4D4D4;
+  --compiler-border: #333333;
+  --compiler-toolbar-bg: #252526;
+  --compiler-toolbar-border: #333333;
 }
 
 /* ─── Smooth transition for theme switch ───────────────────── */
@@ -300,4 +334,194 @@ button {
   h1 {
     font-size: 1.5rem !important;
   }
+}
+
+/* ─── Compiler Styles ──────────────────────────────────────── */
+.compiler-container {
+  border: 1px solid #2D2D3B;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  background-color: #191A23; /* Darker wrapper background */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.compiler-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  background-color: #1E1F2B;
+  border-bottom: 1px solid #2D2D3B;
+}
+
+.compiler-toolbar-left,
+.compiler-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.compiler-select {
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #333446;
+  background-color: #262837;
+  color: #E2E8F0;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+
+.compiler-toolbar-btn {
+  background-color: transparent;
+  color: #94A3B8;
+  border: none;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.compiler-toolbar-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #FFFFFF;
+}
+
+.compiler-toolbar-btn.save-btn {
+  border: 1px solid #10B981;
+  color: #10B981;
+}
+
+.compiler-toolbar-btn.save-btn:hover {
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.compiler-run-btn {
+  background-color: #3B82F6;
+  color: white;
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background-color 0.2s ease;
+}
+
+.compiler-run-btn:hover {
+  background-color: #2563EB;
+}
+
+.compiler-standardize-btn {
+  background-color: #334155;
+  color: #F8FAFC;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.compiler-standardize-btn:hover {
+  background-color: #475569;
+}
+
+.compiler-editor-area {
+  display: flex;
+  flex-direction: column;
+  background-color: #1E1E1E; /* Monaco default dark */
+  padding: 0.5rem 0; /* Add slight padding around monaco */
+}
+
+/* Fallback textarea if Monaco isn't used */
+.compiler-editor-textarea {
+  width: 100%;
+  min-height: 200px;
+  background-color: var(--compiler-bg);
+  color: var(--compiler-text);
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  padding: 1rem;
+  border: none;
+  resize: vertical;
+  outline: none;
+}
+
+.compiler-console {
+  display: flex;
+  flex-direction: column;
+  background-color: #15161E;
+  color: #A7F3D0;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 13px;
+  min-height: 150px;
+  border-top: 1px solid #2D2D3B;
+}
+
+.compiler-console-tabs {
+  display: flex;
+  background-color: #1E1F2B;
+  border-bottom: 1px solid #2D2D3B;
+}
+
+.compiler-console-tab {
+  padding: 0.5rem 1rem;
+  color: #64748B;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-weight: 500;
+}
+
+.compiler-console-tab.active {
+  color: #E2E8F0;
+  border-bottom: 2px solid #3B82F6;
+}
+
+.compiler-console-content {
+  padding: 0.75rem;
+  flex: 1;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+.compiler-stdin-textarea {
+  width: 100%;
+  min-height: 100px;
+  background-color: #1A1B23;
+  color: #FFF;
+  border: 1px solid #2D2D3B;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-family: 'Consolas', 'Courier New', monospace;
+  outline: none;
+  resize: vertical;
+}
+
+/* SQL Table output */
+.sql-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #fff;
+  font-family: var(--font-main);
+  font-size: 12px;
+}
+
+.sql-table th, .sql-table td {
+  border: 1px solid #444;
+  padding: 4px 8px;
+  text-align: left;
+}
+
+.sql-table th {
+  background-color: #333;
 }

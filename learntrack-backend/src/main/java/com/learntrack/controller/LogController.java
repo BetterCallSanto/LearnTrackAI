@@ -46,6 +46,9 @@ public class LogController {
     @Autowired
     private AttachmentService attachmentService;
 
+    @Autowired
+    private com.learntrack.service.CodeSnippetService codeSnippetService;
+
     /**
      * Get all daily logs for a journey.
      */
@@ -142,6 +145,8 @@ public class LogController {
         map.put("description", log.getDescription());
         map.put("shortNoteCount", shortNoteService.getNotesByLog(log.getId()).size());
         map.put("attachmentCount", attachmentService.getAttachmentsByLog(log.getId()).size());
+        map.put("codeSnippetCount", codeSnippetService.getSnippetsByLog(log.getId()).size());
+        map.put("codeSnippetsEnabled", log.getCodeSnippetsEnabled());
         map.put("createdAt", log.getCreatedAt() != null ? log.getCreatedAt().toString() : null);
         return map;
     }
@@ -180,6 +185,22 @@ public class LogController {
                 })
                 .collect(Collectors.toList());
         map.put("attachments", attachmentsList);
+
+        // Add code snippets
+        List<com.learntrack.model.CodeSnippet> snippets = codeSnippetService.getSnippetsByLog(log.getId());
+        List<Map<String, Object>> snippetsList = snippets.stream()
+                .map(snippet -> {
+                    Map<String, Object> sMap = new LinkedHashMap<>();
+                    sMap.put("id", snippet.getId());
+                    sMap.put("title", snippet.getTitle());
+                    sMap.put("language", snippet.getLanguage());
+                    sMap.put("code", snippet.getCode());
+                    sMap.put("editorHeight", snippet.getEditorHeight());
+                    sMap.put("displayOrder", snippet.getDisplayOrder());
+                    return sMap;
+                })
+                .collect(Collectors.toList());
+        map.put("codeSnippets", snippetsList);
 
         return map;
     }

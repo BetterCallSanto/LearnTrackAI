@@ -19,7 +19,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        String uriPath = java.nio.file.Paths.get(uploadDir).toAbsolutePath().normalize().toUri().toString();
+        // toUri() on a directory may or may not have a trailing slash depending on if it exists.
+        // Spring requires a trailing slash for directory locations.
+        if (!uriPath.endsWith("/")) {
+            uriPath += "/";
+        }
         registry.addResourceHandler("/api/files/**")
-                .addResourceLocations("file:" + uploadDir + "/");
+                .addResourceLocations(uriPath);
     }
 }

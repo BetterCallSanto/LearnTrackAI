@@ -77,6 +77,18 @@ public class DailyLog {
     @Builder.Default
     private List<Attachment> attachments = new ArrayList<>();
 
+    @Column(name = "code_snippets_enabled")
+    @Builder.Default
+    private Boolean codeSnippetsEnabled = false;
+
+    /**
+     * All code snippets belonging to this daily log.
+     */
+    @OneToMany(mappedBy = "dailyLog", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("displayOrder ASC")
+    @Builder.Default
+    private List<CodeSnippet> codeSnippets = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
