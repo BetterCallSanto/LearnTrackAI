@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { FiLogOut, FiBookOpen, FiSun, FiMoon } from 'react-icons/fi';
+import { FiLogOut, FiSun, FiMoon } from 'react-icons/fi';
 
 const Navbar = ({ leftContent, rightContent }) => {
   const { user, logout } = useContext(AuthContext);
