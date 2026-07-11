@@ -84,7 +84,10 @@ const RegisterPage = () => {
   return (
     <div className="page-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-page)', padding: '2rem 0' }}>
       <div className="card" style={{ width: '100%', maxWidth: '450px', margin: '0 1rem' }}>
-        <h1 style={{ textAlign: 'center', marginBottom: '0.5rem' }}>Create Account</h1>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+          <img src="/favicon.png" alt="LearnTrack Logo" style={{ width: '72px', height: '72px', objectFit: 'contain' }} />
+        </div>
+        <h1 style={{ textAlign: 'center', marginBottom: '0.5rem', fontSize: '1.75rem' }}>Create Account</h1>
         <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Start your learning journey tracking today</p>
 
         {errorMsg && (

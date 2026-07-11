@@ -5,7 +5,8 @@ import Navbar from '../components/Navbar';
 import ImageLightbox from '../components/ImageLightbox';
 import InterviewAvatar from '../components/InterviewAvatar';
 import CodeSnippet from '../components/CodeSnippet';
-import { FiArrowLeft, FiCheckSquare, FiRefreshCcw, FiChevronDown, FiChevronRight, FiPaperclip, FiImage, FiFileText } from 'react-icons/fi';
+import ConfettiShower from '../components/ConfettiShower';
+import { FiArrowLeft, FiCheckSquare, FiRefreshCcw, FiChevronDown, FiChevronRight, FiPaperclip, FiImage, FiFileText, FiCode } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
@@ -16,6 +17,9 @@ const RevisionPage = () => {
   const [dayGroups, setDayGroups] = useState([]);
   const [activeDay, setActiveDay] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showCodeSnippetsMap, setShowCodeSnippetsMap] = useState({});
+  const [completedDayAnimations, setCompletedDayAnimations] = useState({});
 
   /* attachments cache: { [logId]: [{type, url, name}] } */
   const [attachCache, setAttachCache] = useState({});
@@ -126,27 +130,33 @@ const RevisionPage = () => {
 
       const wasRevised = note.isRevised;
       note.isRevised = !note.isRevised;
-      setDayGroups(newDayGroups);
 
-      await api.patch(`/api/notes/${noteId}/revise`);
+      const isDayComplete = dayGroup.notes.every(n => n.isRevised);
+      if (!wasRevised && isDayComplete) {
+        // Trigger checkmark GIF animation for this day with smooth cross-fade stage transitions
+        setCompletedDayAnimations(prev => ({ ...prev, [dayNumber]: 'playing' }));
+        setTimeout(() => {
+          setCompletedDayAnimations(prev => ({ ...prev, [dayNumber]: 'fading' }));
+        }, 1700);
+        setTimeout(() => {
+          setCompletedDayAnimations(prev => ({ ...prev, [dayNumber]: 'done' }));
+        }, 2200);
 
-      if (!wasRevised) {
-        const isDayComplete = dayGroup.notes.every(n => n.isRevised);
-        if (isDayComplete) {
-          const currentIndex = newDayGroups.findIndex(g => g.dayNumber === dayNumber);
-          if (currentIndex < newDayGroups.length - 1) {
-            const nextGroup = newDayGroups[currentIndex + 1];
-            setTimeout(() => {
-              setActiveDay(nextGroup.dayNumber);
-              toast.success(`Day ${dayNumber} complete! Moving to Day ${nextGroup.dayNumber}`);
-            }, 600);
-          } else {
-            setTimeout(() => {
-              toast.success('🎉 Great job! You have revised all your notes!', { duration: 5000 });
-            }, 600);
-          }
+        const currentIndex = newDayGroups.findIndex(g => g.dayNumber === dayNumber);
+        if (currentIndex < newDayGroups.length - 1) {
+          const nextGroup = newDayGroups[currentIndex + 1];
+          setTimeout(() => {
+            setActiveDay(nextGroup.dayNumber);
+          }, 600);
+        } else {
+          setTimeout(() => {
+            setShowConfetti(true);
+          }, 600);
         }
       }
+
+      setDayGroups(newDayGroups);
+      await api.patch(`/api/notes/${noteId}/revise`);
     } catch (error) {
       toast.error('Failed to update note');
       fetchData();
@@ -206,6 +216,7 @@ const RevisionPage = () => {
 
   return (
     <>
+      {showConfetti && <ConfettiShower duration={3000} onComplete={() => setShowConfetti(false)} />}
       <Navbar leftContent={
         <Link to="/home" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
           <FiArrowLeft /> Back to Home
@@ -298,7 +309,50 @@ const RevisionPage = () => {
                         <span style={{ color: 'var(--text-secondary)', fontSize: '13px', whiteSpace: 'nowrap' }}>
                           {dateStr} • {group.notes.length} notes
                         </span>
-                        {isDayComplete && <FiCheckSquare color="var(--success)" />}
+                        {(() => {
+                          const animState = completedDayAnimations[group.dayNumber];
+                          const isAnimating = animState === 'playing' || animState === 'fading';
+                          
+                          if (!isDayComplete && !isAnimating) return null;
+                          
+                          return (
+                            <div style={{ position: 'relative', width: '20px', height: '20px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                              {isAnimating && (
+                                <img 
+                                  src="/g1.gif" 
+                                  alt="Completed Animation" 
+                                  style={{ 
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '20px',
+                                    height: '20px',
+                                    opacity: animState === 'playing' ? 1 : 0,
+                                    transition: 'opacity 0.5s ease',
+                                    pointerEvents: 'none'
+                                  }} 
+                                />
+                              )}
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  top: 0,
+                                  left: 0,
+                                  width: '20px',
+                                  height: '20px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  opacity: animState === 'playing' ? 0 : 1,
+                                  transition: 'opacity 0.5s ease',
+                                  pointerEvents: animState === 'playing' ? 'none' : 'auto'
+                                }}
+                              >
+                                <FiCheckSquare color="var(--success)" size={20} />
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
 
                       {/* Right side: file icon + chevron */}
@@ -356,25 +410,54 @@ const RevisionPage = () => {
 
                     {isExpanded && (
                       <div style={{ padding: '1.25rem' }}>
-                        {snippets.length > 0 && (
-                          <div style={{ marginBottom: '1.5rem' }}>
-                            {snippets.map(snippet => (
-                              <CodeSnippet
-                                key={snippet.id}
-                                snippet={snippet}
-                                logId={group.logId}
-                                isRevisionMode={true}
-                                onUpdate={(updated) => {
-                                  if (snippetCache[group.logId]) {
-                                    const updatedSnippets = snippetCache[group.logId].map(s => s.id === updated.id ? updated : s);
-                                    setSnippetCache(prev => ({ ...prev, [group.logId]: updatedSnippets }));
-                                  }
+                        {snippets.length > 0 && (() => {
+                          const showCode = !!showCodeSnippetsMap[group.logId];
+                          return (
+                            <div style={{ marginBottom: '1.5rem' }}>
+                              <button
+                                onClick={() => setShowCodeSnippetsMap(prev => ({ ...prev, [group.logId]: !showCode }))}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '0.5rem',
+                                  padding: '6px 14px',
+                                  borderRadius: '20px',
+                                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                                  background: showCode ? 'rgba(77, 142, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                                  color: showCode ? 'var(--primary)' : 'var(--text-secondary)',
+                                  fontSize: '13px',
+                                  fontWeight: '500',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease',
+                                  marginBottom: showCode ? '1.25rem' : '0'
                                 }}
-                                onDelete={() => {}}
-                              />
-                            ))}
-                          </div>
-                        )}
+                              >
+                                <FiCode size={14} />
+                                {showCode ? 'Hide Code Snippets' : `Show Code Snippets (${snippets.length})`}
+                              </button>
+                              
+                              {showCode && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                  {snippets.map(snippet => (
+                                    <CodeSnippet
+                                      key={snippet.id}
+                                      snippet={snippet}
+                                      logId={group.logId}
+                                      isRevisionMode={true}
+                                      onUpdate={(updated) => {
+                                        if (snippetCache[group.logId]) {
+                                          const updatedSnippets = snippetCache[group.logId].map(s => s.id === updated.id ? updated : s);
+                                          setSnippetCache(prev => ({ ...prev, [group.logId]: updatedSnippets }));
+                                        }
+                                      }}
+                                      onDelete={() => {}}
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                         
                         {group.notes.map(note => (
                           <label

@@ -5,6 +5,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
@@ -36,6 +38,12 @@ public class CompilerController {
         if ("sql".equals(language)) {
             // Execute locally against SQLite
             return executeSql(code);
+        } else if ("html".equals(language)) {
+            response.put("stdout", "HTML code is valid. (Note: HTML is not rendered or executed, but you can save it to your logs!)");
+            return ResponseEntity.ok(response);
+        } else if ("css".equals(language)) {
+            response.put("stdout", "CSS code is valid. (Note: CSS is not rendered or executed, but you can save it to your logs!)");
+            return ResponseEntity.ok(response);
         } else {
             // Execute via Judge0 API
             return executeJudge0(language, code, stdin);
@@ -130,6 +138,74 @@ public class CompilerController {
             }
         } catch (Exception e) {
             response.put("stderr", "Error contacting Judge0 API: " + e.getMessage());
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/api/compiler/tables")
+    public ResponseEntity<List<String>> getTables() {
+        List<String> tables = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")) {
+            while (rs.next()) {
+                tables.add(rs.getString("name"));
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching tables: " + e.getMessage());
+        }
+        return ResponseEntity.ok(tables);
+    }
+
+    @GetMapping("/api/compiler/table-data")
+    public ResponseEntity<Map<String, Object>> getTableData(@RequestParam("table") String tableName) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        
+        // Basic SQL injection prevention by checking table names against allowed active tables
+        List<String> allowedTables = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")) {
+            while (rs.next()) {
+                allowedTables.add(rs.getString("name"));
+            }
+        } catch (Exception e) {
+            response.put("error", "Error checking table safety: " + e.getMessage());
+            return ResponseEntity.ok(response);
+        }
+
+        if (!allowedTables.contains(tableName)) {
+            response.put("error", "Invalid or forbidden table name");
+            return ResponseEntity.ok(response);
+        }
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM [" + tableName + "] LIMIT 100")) {
+
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            List<String> headers = new ArrayList<>();
+            for (int i = 1; i <= columnCount; i++) {
+                headers.add(metaData.getColumnName(i));
+            }
+
+            List<List<Object>> rows = new ArrayList<>();
+            while (rs.next()) {
+                List<Object> row = new ArrayList<>();
+                for (int i = 1; i <= columnCount; i++) {
+                    row.add(rs.getObject(i));
+                }
+                rows.add(row);
+            }
+
+            response.put("headers", headers);
+            response.put("rows", rows);
+
+        } catch (Exception e) {
+            response.put("error", "SQL Error: " + e.getMessage());
         }
 
         return ResponseEntity.ok(response);

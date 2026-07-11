@@ -22,6 +22,15 @@ const CreateLogPage = () => {
   const [snippets, setSnippets] = useState([]);
   
   const [newNote, setNewNote] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 600);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const [currentLogId] = useState(isEditMode ? logId : null);
   const isInitializing = useRef(false);
@@ -177,7 +186,7 @@ const CreateLogPage = () => {
 
   const handleAddSnippet = () => {
     const javaTemplate = `public class Main {\n  public static void main(String[] args) {\n    System.out.println("Hello, World!");\n  }\n}`;
-    setSnippets([...snippets, { id: `draft-${Date.now()}`, isDraft: true, title: 'Untitled Snippet', language: 'java', code: javaTemplate }]);
+    setSnippets([...snippets, { id: `draft-${Date.now()}`, isDraft: true, title: 'untitled', language: 'java', code: javaTemplate }]);
   };
 
   const handleDeleteSnippet = async (id) => {
@@ -207,17 +216,17 @@ const CreateLogPage = () => {
       <Navbar 
         leftContent={
           <Link to={`/journey/${id}/logs`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
-            <FiArrowLeft /> Back to Journey
+            <FiArrowLeft /> {!isMobile && 'Back to Journey'}
           </Link>
         }
         rightContent={
           <button 
             onClick={handleSaveLog} 
             className="btn-primary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0' : '0.5rem', padding: isMobile ? '0.6rem' : '0.5rem 1rem' }}
             disabled={isSaving}
           >
-            {isSaving ? <div className="spinner"></div> : <><FiSave /> Save Log</>}
+            {isSaving ? <div className="spinner"></div> : <><FiSave /> {!isMobile && 'Save Log'}</>}
           </button>
         }
       />
@@ -322,13 +331,13 @@ const CreateLogPage = () => {
 
             {/* Code Snippets Section */}
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h3 style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <FiCode /> Code Snippet Interactive Compiler
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'nowrap' }}>
+                <h3 style={{ fontSize: isMobile ? '1rem' : '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap', margin: 0 }}>
+                  <FiCode /> {isMobile ? 'Compiler' : 'Code Snippet Interactive Compiler'}
                 </h3>
-                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-secondary)' }}>Enable Compiler</span>
-                  <div style={{ position: 'relative', width: '40px', height: '24px', backgroundColor: log.codeSnippetsEnabled ? 'var(--primary)' : 'var(--border)', borderRadius: '12px', transition: '0.3s' }}>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '0.5rem', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-secondary)' }}>{isMobile ? 'Enable' : 'Enable Compiler'}</span>
+                  <div style={{ position: 'relative', width: '40px', height: '24px', backgroundColor: log.codeSnippetsEnabled ? 'var(--primary)' : 'var(--border)', borderRadius: '12px', transition: '0.3s', flexShrink: 0 }}>
                     <div style={{ position: 'absolute', top: '2px', left: log.codeSnippetsEnabled ? '18px' : '2px', width: '20px', height: '20px', backgroundColor: 'white', borderRadius: '50%', transition: '0.3s' }} />
                   </div>
                   <input type="checkbox" style={{ display: 'none' }} checked={log.codeSnippetsEnabled} onChange={handleToggleSnippets} />

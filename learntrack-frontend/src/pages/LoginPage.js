@@ -51,8 +51,11 @@ const LoginPage = () => {
   return (
     <div className="page-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-page)' }}>
       <div className="card" style={{ width: '100%', maxWidth: '400px', margin: '2rem' }}>
-        <h1 style={{ textAlign: 'center', marginBottom: '0.5rem' }}>Welcome Back</h1>
-        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Log in to your LearnTrack account</p>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+          <img src="/favicon.png" alt="LearnTrack Logo" style={{ width: '72px', height: '72px', objectFit: 'contain' }} />
+        </div>
+        <h1 style={{ textAlign: 'center', marginBottom: '0.5rem', fontSize: '1.75rem' }}>Welcome Back</h1>
+        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Log in to your account</p>
 
         {errorMsg && (
           <div style={{ backgroundColor: 'var(--error-banner-bg)', color: 'var(--error)', padding: '0.75rem', borderRadius: '6px', marginBottom: '1rem', fontSize: '14px', textAlign: 'center' }}>

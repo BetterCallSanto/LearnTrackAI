@@ -23,6 +23,7 @@ import java.util.*;
  * interviewer who asks topic-specific questions based on the learning journey content.
  *
  * Conversations are ephemeral (not persisted to the database).
+ * Model: llama-3.3-70b-versatile (reliable multi-turn, no reasoning overhead).
  */
 @Service
 public class InterviewService {
@@ -49,13 +50,18 @@ public class InterviewService {
      *
      * Builds a system prompt from the journey's logs and notes, prepends it
      * to the user's conversation history, and forwards the full message array
-     * to the Groq API.
+     * to the Groq API. Retries once on empty content before returning a fallback.
      *
      * @param journey  The learning journey providing topic context
-     * @param messages The conversation history from the frontend
-     * @return The assistant's reply text
+     * @param messages The conversation history from the frontend (must start with a user message)
+     * @return The assistant's reply text, never null/empty
      */
     public String chat(LearningJourney journey, List<Map<String, String>> messages) {
+        if (groqApiKey == null || groqApiKey.trim().isEmpty()) {
+            System.err.println("WARNING: groq.api.key is blank. Please set the GROQ_API_KEY environment variable.");
+            return "Groq API key is missing. Please configure the GROQ_API_KEY environment variable in your backend application's environment/run settings to enable the AI interview feature.";
+        }
+
         // Build the system prompt with journey context
         String systemPrompt = buildSystemPrompt(journey);
 
@@ -67,14 +73,33 @@ public class InterviewService {
         fullMessages.add(systemMessage);
         fullMessages.addAll(messages);
 
-        // Build the request body
+        // Try up to 2 times to get a non-empty reply
+        for (int attempt = 1; attempt <= 2; attempt++) {
+            String result = callGroq(fullMessages, attempt == 2);
+            if (result != null && !result.isBlank()) {
+                return result;
+            }
+            System.err.println("InterviewService: empty reply on attempt " + attempt + ", retrying...");
+        }
+
+        return "(smiling) Sorry, my thoughts got tangled for a second! Could you repeat that? I'm all ears.";
+    }
+
+    /**
+     * Makes a single call to the Groq API and returns the content string.
+     *
+     * @param fullMessages   Complete messages array including system prompt
+     * @param lowerTemp      If true, use a slightly lower temperature for the retry
+     * @return The raw content string, or null if API call failed / content was empty
+     */
+    private String callGroq(List<Map<String, String>> fullMessages, boolean lowerTemp) {
         Map<String, Object> requestBody = new LinkedHashMap<>();
         requestBody.put("model", groqModel);
         requestBody.put("messages", fullMessages);
-        requestBody.put("temperature", 0.8);
-        requestBody.put("max_tokens", 1024);
+        requestBody.put("temperature", lowerTemp ? 0.5 : 0.75);
+        requestBody.put("max_tokens", 4096);
+        requestBody.put("reasoning_format", "hidden");
 
-        // Set headers
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(groqApiKey);
@@ -89,71 +114,99 @@ public class InterviewService {
                     Map.class
             );
 
-            // Extract the assistant's reply from the Groq API response
             Map<String, Object> body = response.getBody();
-            if (body != null && body.containsKey("choices")) {
-                List<Map<String, Object>> choices = (List<Map<String, Object>>) body.get("choices");
-                if (!choices.isEmpty()) {
-                    Map<String, Object> firstChoice = choices.get(0);
-                    Map<String, String> message = (Map<String, String>) firstChoice.get("message");
-                    return message.get("content");
-                }
+            if (body == null) return null;
+
+            // Handle API-level error in response body (e.g. model quota exceeded)
+            if (body.containsKey("error")) {
+                Object err = body.get("error");
+                System.err.println("Groq API returned error: " + err);
+                return null;
             }
 
-            return "I'm having trouble thinking right now. Could you try again?";
+            if (body.containsKey("choices")) {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> choices = (List<Map<String, Object>>) body.get("choices");
+                if (!choices.isEmpty()) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> firstChoice = choices.get(0);
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> message = (Map<String, Object>) firstChoice.get("message");
+                    if (message == null) return null;
+                    Object contentObj = message.get("content");
+                    if (contentObj == null) return null;
+                    String content = contentObj.toString().trim();
+                    // Strip any leftover <think> tags (safety net)
+                    content = content.replaceAll("(?s)<think>.*?</think>", "").trim();
+                    return content.isEmpty() ? null : content;
+                }
+            }
+            return null;
         } catch (Exception e) {
-            System.err.println("Groq API error: " + e.getMessage());
-            e.printStackTrace();
-            return "Sorry, I couldn't connect to my brain right now. Please try again in a moment.";
+            System.err.println("Groq API call failed: " + e.getMessage());
+            return null;
         }
     }
 
     /**
-     * Build a dynamic system prompt from the journey's daily logs and short notes.
-     *
-     * The prompt instructs Pam to act as a professional interviewer and
-     * restricts questions to the specific topics covered in the journey.
+     * Build a dynamic, evaluation-focused system prompt from the journey's daily logs
+     * and short notes. The prompt instructs Pam to:
+     * - Warmly greet and kick off the session
+     * - Always evaluate the user's EXACT answer before asking the next question
+     * - Follow the thread of the conversation naturally (pick up on what was said)
+     * - Ask exactly ONE question per turn
+     * - Stay within the journey's covered topics
      */
     private String buildSystemPrompt(LearningJourney journey) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("You are Pam Beesley, a friendly, warm, and professional female mock interviewer. ");
-        sb.append("You are conducting a practice interview for a learner who has been studying: \"");
+        // ── Persona ──────────────────────────────────────────────────────────────────
+        sb.append("You are Pam Beesley, a warm, sharp, and professional female mock interviewer.\n");
+        sb.append("You are running a one-on-one practice interview for a learner studying: \"");
         sb.append(journey.getName()).append("\".\n\n");
 
-        sb.append("Your personality traits:\n");
-        sb.append("- Warm and encouraging, but honest with feedback\n");
-        sb.append("- Professional and knowledgeable\n");
-        sb.append("- You give brief, constructive feedback on each answer before asking the next question\n");
-        sb.append("- You use casual expressions in parentheses like (smiling), (nodding), (impressed) to show emotion\n");
-        sb.append("- You keep your responses concise and focused\n\n");
+        // ── Personality ───────────────────────────────────────────────────────────────
+        sb.append("## Your personality\n");
+        sb.append("- Encouraging but honest — you celebrate correct answers and gently correct wrong ones.\n");
+        sb.append("- Conversational and warm — use natural language, not robotic phrasing.\n");
+        sb.append("- You express emotion with short cues like (smiling), (nodding), (impressed), (thoughtful).\n");
+        sb.append("- Concise — your responses are SHORT: 2-4 sentences max per turn.\n\n");
 
-        sb.append("Interview rules:\n");
-        sb.append("- When the user first says hello or yes, greet them warmly and ask if they're ready to start\n");
-        sb.append("- Once they confirm, start asking questions one at a time. Do NOT ask questions in chronological order of days; shuffle the topics and pick a random starting concept from the topics list below to keep each session completely fresh.\n");
-        sb.append("- Act like a real conversational interviewer: pay close attention to the user's response. When they mention technical terms, concepts, or details in their answer, link your next question to what they just said. Ask them 'how', 'why', or to explain/give an example of the concept they brought up (for example, if they mention 'constructor chaining', immediately drill down and ask them to explain or write code for constructor chaining).\n");
-        sb.append("- Do not jump abruptly to a completely new topic. Follow the thread of conversation naturally by asking deep follow-up questions based on their answers, and only pivot to another topic from the list once that concept has been explored.\n");
-        sb.append("- After the user answers, give brief, natural feedback (e.g., 'Exactly!', 'That's close, but...', or 'Impressed! Yes, that's correct') before transitioning to your follow-up or the next question.\n");
-        sb.append("- Vary question difficulty: mix conceptual, practical, and scenario-based questions.\n");
-        sb.append("- Generate completely different, non-repetitive questions every session — never use the same opening or follow-up questions.\n");
-        sb.append("- Ask exactly one question at a time. Never ask multiple questions in a single message.\n");
-        sb.append("- If the user says 'end interview' or 'stop', summarize their performance, list areas of strength and improvement, and say goodbye warmly.\n\n");
+        // ── Core rules ────────────────────────────────────────────────────────────────
+        sb.append("## Core rules — follow EVERY rule EVERY turn\n");
+        sb.append("1. **ALWAYS produce a visible reply.** Never return an empty or blank message.\n");
+        sb.append("2. **Greeting phase**: If the user says hi/hello/hey or something non-committal, greet them warmly and ask if they're ready to start.\n");
+        sb.append("3. **Start phase**: Once the user says yes/ready/start/sure/go, immediately ask your FIRST question — do not ask if they're ready again.\n");
+        sb.append("4. **Evaluation on every answer**: After the user answers any question:\n");
+        sb.append("   a. Give one short line of SPECIFIC feedback on what they said (correct, partially correct, or missing something key).\n");
+        sb.append("   b. If correct: acknowledge it (\"Exactly!\", \"Spot on!\", \"(nodding) That's right!\").\n");
+        sb.append("   c. If partially correct or missing detail: say what was good and add the missing piece.\n");
+        sb.append("   d. If incorrect: gently correct (\"Not quite — [correct answer in one sentence]\").\n");
+        sb.append("5. **Follow the thread**: If the user mentions a specific concept or term, your NEXT question should drill into that concept — ask how/why/example of what they just mentioned.\n");
+        sb.append("6. **Ask ONE question per turn.** Never ask two questions in the same message.\n");
+        sb.append("7. **Vary difficulty**: mix concept questions, practical 'what happens if' scenarios, and 'give an example' questions.\n");
+        sb.append("8. **Fresh every session**: never start with the same question twice.\n");
+        sb.append("9. **End interview**: if the user says 'stop', 'end', or 'quit', give a short performance summary with 2 strengths and 1 area to improve, then say goodbye warmly.\n\n");
 
-        // Gather journey topics from daily logs and short notes
+        // ── Output format ─────────────────────────────────────────────────────────────
+        sb.append("## Output format\n");
+        sb.append("Your reply must ALWAYS have exactly two parts in this order:\n");
+        sb.append("  [Feedback on user's last answer — omit only on the very first question]\n");
+        sb.append("  [Your next question OR closing summary]\n");
+        sb.append("Keep the whole reply under 80 words.\n\n");
+
+        // ── Topics ────────────────────────────────────────────────────────────────────
         List<DailyLog> logs = logDAO.findByJourneyId(journey.getId());
 
         if (!logs.isEmpty()) {
-            sb.append("=== TOPICS COVERED IN THIS JOURNEY ===\n\n");
-            
+            sb.append("## Topics covered in this journey (base your questions on these)\n\n");
+
             List<DailyLog> selectedLogs = new ArrayList<>(logs);
-            if (selectedLogs.size() > 8) {
-                // Deterministic seed changes every 30 minutes to keep selection stable during one interview session
-                long timeWindow = System.currentTimeMillis() / (1000 * 60 * 30);
+            if (selectedLogs.size() > 10) {
+                long timeWindow = System.currentTimeMillis() / (1000L * 60 * 30);
                 long seed = journey.getId() + timeWindow;
-                Random rand = new Random(seed);
-                Collections.shuffle(selectedLogs, rand);
-                selectedLogs = selectedLogs.subList(0, 8);
-                // Sort them back by day number for readability
+                Collections.shuffle(selectedLogs, new Random(seed));
+                selectedLogs = selectedLogs.subList(0, 10);
                 selectedLogs.sort(Comparator.comparingInt(DailyLog::getDayNumber));
             }
 
@@ -165,30 +218,25 @@ public class InterviewService {
                 sb.append("\n");
 
                 List<ShortNote> notes = shortNoteDAO.findByLogId(log.getId());
-                if (!notes.isEmpty()) {
-                    sb.append("  Key points:\n");
-                    int noteCount = 0;
-                    for (ShortNote note : notes) {
-                        if (noteCount >= 3) break;
-                        String content = note.getContent();
-                        if (content != null && !content.isBlank()) {
-                            if (content.length() > 100) {
-                                content = content.substring(0, 97) + "...";
-                            }
-                            sb.append("    - ").append(content).append("\n");
-                            noteCount++;
-                        }
+                int noteCount = 0;
+                for (ShortNote note : notes) {
+                    if (noteCount >= 4) break;
+                    String content = note.getContent();
+                    if (content != null && !content.isBlank()) {
+                        if (content.length() > 120) content = content.substring(0, 117) + "...";
+                        sb.append("  • ").append(content).append("\n");
+                        noteCount++;
                     }
                 }
                 sb.append("\n");
             }
         } else {
-            sb.append("The learner hasn't logged any topics yet. Ask them general questions about: ");
-            sb.append(journey.getName()).append("\n");
+            sb.append("## Topics\n");
+            sb.append("The learner has not logged any specific topics yet.\n");
+            sb.append("Ask foundational questions about: ").append(journey.getName()).append("\n\n");
         }
 
-        sb.append("\nRemember: Stay within these topics only. Be encouraging but honest.");
-
+        sb.append("Remember: every single reply must be non-empty, under 80 words, and must follow the core rules above.");
         return sb.toString();
     }
 }

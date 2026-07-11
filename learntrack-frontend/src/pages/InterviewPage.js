@@ -84,8 +84,13 @@ const InterviewPage = () => {
     setIsSending(true);
 
     try {
+      // Strip any leading assistant messages (e.g. the hardcoded initial greeting)
+      // so Groq always receives a conversation that starts with a user message.
+      const firstUserIdx = updatedMessages.findIndex(m => m.role === 'user');
+      const messagesToSend = firstUserIdx >= 0 ? updatedMessages.slice(firstUserIdx) : updatedMessages;
+
       const res = await api.post(`/api/interview/${id}/chat`, {
-        messages: updatedMessages
+        messages: messagesToSend
       });
 
       const assistantMessage = {

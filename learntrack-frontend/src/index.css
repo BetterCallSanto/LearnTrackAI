@@ -350,9 +350,13 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 0.75rem;
   background-color: #1E1F2B;
   border-bottom: 1px solid #2D2D3B;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 10;
 }
 
 .compiler-toolbar-left,
@@ -524,4 +528,37 @@ button {
 
 .sql-table th {
   background-color: #333;
+}
+
+@media (max-width: 576px) {
+  .compiler-toolbar {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0.5rem 0.75rem !important;
+    gap: 0.4rem !important;
+    flex-wrap: nowrap !important;
+  }
+  .compiler-toolbar-left {
+    flex-shrink: 0 !important;
+    width: auto !important;
+    justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
+    gap: 0.3rem !important;
+  }
+  .compiler-toolbar-right {
+    flex-shrink: 0 !important;
+    width: auto !important;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
+    gap: 0.4rem !important;
+  }
+  .compiler-select {
+    padding: 0.3rem 0.4rem !important;
+    font-size: 12px !important;
+  }
+  .compiler-toolbar-btn {
+    padding: 0.3rem 0.4rem !important;
+    font-size: 12px !important;
+  }
 }
