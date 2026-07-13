@@ -1,6 +1,18 @@
 learntrack-backend/target/
 database_dump.sql
+database_dump_utf8.sql
 uploads/
 learntrack-backend/uploads/
 .env
-database_dump_utf8.sql
+
+# Node
+node_modules/
+
+# IDEs
+.idea/
+.vscode/
+
+# Build and Runtime
+*.class
+*.log
+*.db

@@ -13,6 +13,8 @@ import JourneyDetailPage from './pages/JourneyDetailPage';
 import CreateLogPage from './pages/CreateLogPage';
 import RevisionPage from './pages/RevisionPage';
 import InterviewPage from './pages/InterviewPage';
+import UniversalCompilerPage from './pages/UniversalCompilerPage';
+import DwightChatPage from './pages/DwightChatPage';
 
 function App() {
   return (
@@ -66,6 +68,18 @@ function App() {
           <Route path="/journey/:id/interview" element={
             <ProtectedRoute>
               <InterviewPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/compiler" element={
+            <ProtectedRoute>
+              <UniversalCompilerPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/dwight-chat" element={
+            <ProtectedRoute>
+              <DwightChatPage />
             </ProtectedRoute>
           } />
           

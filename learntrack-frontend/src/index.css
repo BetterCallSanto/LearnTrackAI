@@ -338,11 +338,9 @@ button {
 
 /* ─── Compiler Styles ──────────────────────────────────────── */
 .compiler-container {
-  border: 1px solid #2D2D3B;
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 1.5rem;
-  background-color: #191A23; /* Darker wrapper background */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -351,8 +349,6 @@ button {
   justify-content: space-between;
   align-items: center;
   padding: 0.6rem 0.75rem;
-  background-color: #1E1F2B;
-  border-bottom: 1px solid #2D2D3B;
   flex-wrap: nowrap;
   gap: 0.5rem;
   position: relative;
@@ -369,9 +365,9 @@ button {
 .compiler-select {
   padding: 0.35rem 0.75rem;
   border-radius: 6px;
-  border: 1px solid #333446;
-  background-color: #262837;
-  color: #E2E8F0;
+  border: 1px solid var(--border);
+  background-color: transparent;
+  color: inherit;
   font-size: 13px;
   outline: none;
   cursor: pointer;
@@ -379,7 +375,7 @@ button {
 
 .compiler-toolbar-btn {
   background-color: transparent;
-  color: #94A3B8;
+  color: inherit;
   border: none;
   font-size: 13px;
   display: flex;
@@ -389,11 +385,12 @@ button {
   border-radius: 6px;
   transition: all 0.2s ease;
   font-weight: 500;
+  cursor: pointer;
 }
 
 .compiler-toolbar-btn:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #FFFFFF;
+  background-color: var(--bg-hover-row);
+  opacity: 0.8;
 }
 
 .compiler-toolbar-btn.save-btn {
@@ -441,8 +438,6 @@ button {
 .compiler-editor-area {
   display: flex;
   flex-direction: column;
-  background-color: #1E1E1E; /* Monaco default dark */
-  padding: 0.5rem 0; /* Add slight padding around monaco */
 }
 
 /* Fallback textarea if Monaco isn't used */
@@ -561,4 +556,60 @@ button {
     padding: 0.3rem 0.4rem !important;
     font-size: 12px !important;
   }
+}
+
+.compiler-select option {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+@keyframes goldShine {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: 0% center;
+  }
+}
+
+.gold-shimmer-text {
+  background: linear-gradient(90deg, #B38728 0%, #FBF5B7 20%, #DAA520 40%, #FBF5B7 60%, #B38728 80%, #FBF5B7 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  animation: goldShine 4s linear infinite;
+  display: inline-block;
+}
+
+.brand-logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brand-logo-link img {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 0 4px rgba(218, 165, 32, 0.3));
+}
+
+.brand-logo-link:hover {
+  transform: scale(1.08);
+}
+
+.brand-logo-link:hover img {
+  filter: drop-shadow(0 0 10px rgba(251, 245, 183, 0.75)) drop-shadow(0 0 3px rgba(218, 165, 32, 0.5));
+}
+
+.brand-logo-standalone {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 0 6px rgba(218, 165, 32, 0.35));
+}
+
+.brand-logo-standalone:hover {
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 14px rgba(251, 245, 183, 0.8)) drop-shadow(0 0 4px rgba(218, 165, 32, 0.65));
 }

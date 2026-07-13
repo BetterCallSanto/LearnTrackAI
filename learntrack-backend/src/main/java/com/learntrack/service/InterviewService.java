@@ -98,7 +98,9 @@ public class InterviewService {
         requestBody.put("messages", fullMessages);
         requestBody.put("temperature", lowerTemp ? 0.5 : 0.75);
         requestBody.put("max_tokens", 4096);
-        requestBody.put("reasoning_format", "hidden");
+        if (groqModel != null && groqModel.toLowerCase().contains("deepseek")) {
+            requestBody.put("reasoning_format", "hidden");
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -128,7 +130,6 @@ public class InterviewService {
                 @SuppressWarnings("unchecked")
                 List<Map<String, Object>> choices = (List<Map<String, Object>>) body.get("choices");
                 if (!choices.isEmpty()) {
-                    @SuppressWarnings("unchecked")
                     Map<String, Object> firstChoice = choices.get(0);
                     @SuppressWarnings("unchecked")
                     Map<String, Object> message = (Map<String, Object>) firstChoice.get("message");
@@ -136,14 +137,17 @@ public class InterviewService {
                     Object contentObj = message.get("content");
                     if (contentObj == null) return null;
                     String content = contentObj.toString().trim();
-                    // Strip any leftover <think> tags (safety net)
-                    content = content.replaceAll("(?s)<think>.*?</think>", "").trim();
+                    // Strip any leftover <think> tags (safety net), even if unclosed
+                    content = content.replaceAll("(?s)<think>(.*?)(</think>|$)", "").trim();
                     return content.isEmpty() ? null : content;
                 }
             }
             return null;
         } catch (Exception e) {
             System.err.println("Groq API call failed: " + e.getMessage());
+            if (e.getMessage() != null && e.getMessage().contains("429")) {
+                throw new RuntimeException("API Rate Limit exceeded. Please wait 10 minutes or switch the AI model.");
+            }
             return null;
         }
     }

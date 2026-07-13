@@ -7,6 +7,8 @@ import JourneyCard from '../components/JourneyCard';
 import { FiPlus } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 
+import DwightChatbot from '../components/DwightChatbot';
+
 const HomePage = () => {
   const { user } = useContext(AuthContext);
   const [journeys, setJourneys] = useState([]);
@@ -94,13 +96,14 @@ const HomePage = () => {
               ))}
             </div>
           ) : (
-            <div className="card" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+            <div className="card" style={{ textDecoration: 'none', textAlign: 'center', padding: '4rem 2rem' }}>
               <h3 style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>No learning journeys yet. Start your first one!</h3>
               <Link to="/journey/create" className="btn-primary">Create New Journey</Link>
             </div>
           )}
         </div>
       </div>
+      <DwightChatbot />
     </>
   );
 };
