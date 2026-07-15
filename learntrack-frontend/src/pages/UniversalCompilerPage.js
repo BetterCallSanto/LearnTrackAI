@@ -23,8 +23,9 @@ const TEMPLATES = {
   sql: `SELECT * FROM products;`
 };
 
-const API_BASE = 'http://localhost:8080/api/universal-projects';
-const RUN_API = 'http://localhost:8080/api/compiler/run';
+const BACKEND_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+const API_BASE = `${BACKEND_URL}/api/universal-projects`;
+const RUN_API = `${BACKEND_URL}/api/compiler/run`;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
@@ -105,7 +106,7 @@ const UniversalCompilerPage = () => {
   // Handle SQL Table list loading
   const fetchTables = useCallback(async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/compiler/tables', getAuthHeaders());
+      const res = await axios.get(`${BACKEND_URL}/api/compiler/tables`, getAuthHeaders());
       setDbTables(res.data || []);
     } catch (e) {
       console.error('Failed to fetch DB tables', e);
@@ -115,7 +116,7 @@ const UniversalCompilerPage = () => {
   const fetchTableData = useCallback(async (tableName) => {
     setIsLoadingTable(true);
     try {
-      const res = await axios.get(`http://localhost:8080/api/compiler/table-data?table=${tableName}`, getAuthHeaders());
+      const res = await axios.get(`${BACKEND_URL}/api/compiler/table-data?table=${tableName}`, getAuthHeaders());
       if (res.data.error) {
         toast.error(res.data.error);
         setTableData(null);
